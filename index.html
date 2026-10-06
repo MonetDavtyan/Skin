@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Մարդու մաշկը</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Armenian:wght@600;800;900&family=Noto+Sans+Armenian:wght@400;600;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --mat:#2c7a5a; --mat-deep:#215f45; --mat-line:rgba(255,255,255,.10); --mat-line2:rgba(255,255,255,.22);
+  --paper:#fbf7ee; --paper-2:#f1e9d8; --ink:#2a1f1a; --ink-soft:#6c5a4e; --on-mat:#fff6e3; --on-mat-soft:#cfe8dc;
+  --shadow:rgba(10,40,25,.35);
+  --c-epi:#f7d23e; --c-dermis:#e5404e; --c-fat:#f5922b; --c-deep:#f4f0e6; --c-hair:#7a3d26; --c-root:#7b3fb3;
+  --c-gland:#4cbf3f; --c-nerve:#f6cf2f; --c-artery:#d82f35; --c-vein:#2f6fd6; --c-sheath:#f27a86;
+  --f-head:"Noto Serif Armenian","Sylfaen","Arial Unicode MS",Georgia,serif;
+  --f-body:"Noto Sans Armenian","Sylfaen","Arial Unicode MS","Segoe UI",sans-serif;
+  --f-num:"Fredoka","Noto Sans Armenian","Arial Rounded MT Bold",sans-serif;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --mat:#1c4f3b; --mat-deep:#143829; --paper:#f4eee2; --shadow:rgba(0,0,0,.55); }
+}
+:root[data-theme="dark"]{ --mat:#1c4f3b; --mat-deep:#143829; --paper:#f4eee2; --shadow:rgba(0,0,0,.55); }
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0}
+body{
+  background:var(--mat); color:var(--ink); font-family:var(--f-body); overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+/* cutting mat */
+#mat{position:fixed;inset:0;
+  background:
+    radial-gradient(120% 80% at 50% 40%, transparent 50%, rgba(0,0,0,.28) 100%),
+    linear-gradient(var(--mat-line2) 1px, transparent 1px) 0 0/100px 100px,
+    linear-gradient(90deg,var(--mat-line2) 1px, transparent 1px) 0 0/100px 100px,
+    linear-gradient(var(--mat-line) 1px, transparent 1px) 0 0/20px 20px,
+    linear-gradient(90deg,var(--mat-line) 1px, transparent 1px) 0 0/20px 20px,
+    var(--mat);
+}
+#mat::before{content:"";position:absolute;left:0;right:0;top:0;height:14px;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.45) 0 1px,transparent 1px 20px),
+             repeating-linear-gradient(90deg,rgba(255,255,255,.7) 0 2px,transparent 2px 100px);
+  -webkit-mask:linear-gradient(#000 60%,transparent);mask:linear-gradient(#000 60%,transparent)}
+#mat::after{content:"";position:absolute;top:0;bottom:0;left:0;width:14px;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.45) 0 1px,transparent 1px 20px),
+             repeating-linear-gradient(0deg,rgba(255,255,255,.7) 0 2px,transparent 2px 100px)}
+#print{position:fixed;right:-120px;bottom:-140px;width:520px;opacity:.07;pointer-events:none}
+
+#viewport{position:fixed;inset:0}
+#stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform-origin:center}
+.slide{position:absolute;inset:0;padding:52px 72px 70px;opacity:0;visibility:hidden;transition:opacity .45s, visibility .45s}
+.slide.active{opacity:1;visibility:visible}
+.r{opacity:1}
+.slide.active .r{animation:rise .75s cubic-bezier(.2,1.25,.4,1) both;animation-delay:calc(var(--d,0)*90ms + 100ms)}
+@keyframes rise{from{opacity:0;transform:translateY(26px) scale(.97)}to{opacity:1;transform:none}}
+
+h1,h2{font-family:var(--f-head);color:var(--on-mat);margin:0;letter-spacing:-.01em;
+  text-shadow:0 3px 0 rgba(0,0,0,.22), 0 10px 26px rgba(0,0,0,.25)}
+h2{font-size:46px;font-weight:900;line-height:1.15}
+.sub{color:var(--on-mat-soft);font-size:21px;margin:10px 0 0;max-width:62ch}
+.chip{display:inline-flex;align-items:center;gap:10px;font-family:var(--f-num);font-weight:600;font-size:17px;
+  color:var(--mat-deep);background:var(--c-epi);padding:6px 14px 6px 8px;border-radius:999px;margin-bottom:14px;
+  box-shadow:inset 0 -4px 0 rgba(0,0,0,.14), inset 0 3px 0 rgba(255,255,255,.5)}
+.chip b{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--paper);font-weight:700}
+
+/* clay primitives */
+.clay{border:0;font:inherit;color:inherit;cursor:pointer;background:var(--bc,var(--paper));border-radius:22px;
+  box-shadow:inset 0 -7px 0 rgba(0,0,0,.15), inset 0 5px 0 rgba(255,255,255,.5), 0 10px 22px var(--shadow);
+  transition:transform .15s, box-shadow .15s, filter .2s}
+.clay:hover{transform:translateY(-2px)}
+.clay:active,.clay.pressed{transform:translateY(3px);box-shadow:inset 0 -3px 0 rgba(0,0,0,.15), inset 0 3px 0 rgba(255,255,255,.45), 0 4px 10px var(--shadow)}
+.clay:focus-visible{outline:4px solid var(--c-epi);outline-offset:4px}
+.paper{background:var(--paper);border-radius:28px;box-shadow:0 2px 0 rgba(255,255,255,.6) inset, 0 18px 40px var(--shadow)}
+.hint{font-size:16px;color:var(--on-mat-soft);display:inline-flex;gap:8px;align-items:center}
+.hint::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--c-epi);animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.25}}
+
+/* ---------- skin svg ---------- */
+.skin .part{transition:opacity .35s}
+.skin .part,.skin .part *{transform-box:fill-box;transform-origin:center}
+.skin.focus .part{opacity:.16}
+.skin.focus .part.on{opacity:1}
+.skin.focus .part.on{animation:pop .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{40%{transform:scale(1.03)}}
+#layerSkin .part{cursor:pointer}
+.build .part{opacity:1}
+.slide.active .build .part{animation:drop .9s cubic-bezier(.3,1.45,.5,1) both;animation-delay:var(--bd)}
+@keyframes drop{from{transform:translateY(-420px);opacity:0}30%{opacity:1}to{transform:none}}
+
+/* ---------- slide 1 ---------- */
+#s1{display:grid;grid-template-columns:1.05fr 1fr;align-items:center;gap:20px}
+#s1 h1{font-size:104px;font-weight:900;line-height:1}
+#s1 .tag{margin-top:26px;font-size:26px;color:var(--on-mat);font-family:var(--f-head);font-weight:600}
+#s1 .stack{display:flex;gap:10px;margin-top:34px}
+#s1 .stack span{height:18px;border-radius:9px;box-shadow:inset 0 -4px 0 rgba(0,0,0,.15)}
+#s1 .hint{margin-top:40px}
+#s1 svg{width:100%;height:600px;filter:drop-shadow(0 26px 30px rgba(0,0,0,.35))}
+
+/* ---------- slide 2 ---------- */
+.funcs{display:grid;grid-template-columns:repeat(4,1fr);gap:26px;margin-top:46px}
+.func{padding:30px 24px 26px;text-align:left;min-height:330px;display:flex;flex-direction:column;border-radius:34px}
+.func .ic{font-size:66px;line-height:1;margin-bottom:auto}
+.func h3{font-family:var(--f-head);font-size:27px;line-height:1.2;margin:22px 0 8px;font-weight:800}
+.func p{margin:0;font-size:17px;line-height:1.45;color:rgba(42,31,26,.78)}
+.func .go{margin-top:16px;font-family:var(--f-num);font-weight:600;font-size:15px;opacity:.7}
+
+/* ---------- slide 3 layers ---------- */
+#s3 .wrap{display:grid;grid-template-columns:570px 1fr;gap:40px;margin-top:6px;align-items:start}
+#layerSkin{width:560px;height:504px;filter:drop-shadow(0 20px 26px rgba(0,0,0,.35))}
+.side{display:flex;flex-direction:column;gap:12px;padding-top:10px}
+.stackBtns{display:flex;flex-direction:column;gap:6px}
+.stackBtns .clay{display:flex;align-items:center;gap:14px;padding:8px 18px 10px;border-radius:16px;font-weight:800;font-size:18px;text-align:left}
+.stackBtns .clay i{font-style:normal;font-family:var(--f-num);font-weight:700;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.55);color:var(--ink)}
+.stackBtns .clay.sel{outline:4px solid var(--on-mat);outline-offset:3px}
+.parts{display:flex;flex-wrap:wrap;gap:9px}
+.parts .clay{padding:7px 14px 9px;border-radius:999px;font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px}
+.parts .clay .dot{width:16px;height:16px;border-radius:50%;background:var(--dc);box-shadow:inset 0 -3px 0 rgba(0,0,0,.2)}
+.parts .clay.sel{outline:4px solid var(--on-mat);outline-offset:2px}
+.info{padding:16px 24px 18px;min-height:140px;position:relative;overflow:hidden}
+.info .swatch{position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:var(--ic,var(--c-epi));opacity:.9;box-shadow:inset 0 -10px 0 rgba(0,0,0,.12)}
+.info small{font-family:var(--f-num);font-weight:600;font-size:15px;color:var(--ink-soft)}
+.info h3{font-family:var(--f-head);font-size:25px;margin:2px 0 6px;max-width:80%;line-height:1.15}
+.info p{margin:0;font-size:16.5px;line-height:1.45;max-width:48ch}
+.info.flash{animation:infoIn .4s cubic-bezier(.3,1.5,.5,1)}
+@keyframes infoIn{from{transform:scale(.96)}}
+
+/* ---------- slide 4 shield ---------- */
+#s4 .wrap{display:grid;grid-template-columns:740px 1fr;gap:36px;margin-top:26px}
+.arena{position:relative;height:500px;border-radius:30px;overflow:hidden;
+  background:linear-gradient(#bfe6ff,#e7f6ff 50%,#e5404e 50.1%,#c9303e);box-shadow:0 18px 40px var(--shadow)}
+.arena .lab{position:absolute;left:22px;font-family:var(--f-head);font-weight:800;font-size:20px;padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.75)}
+.band{position:absolute;left:0;right:0;top:232px;height:60px;background:var(--c-epi);
+  box-shadow:inset 0 -10px 0 rgba(0,0,0,.12), inset 0 8px 0 rgba(255,255,255,.45);transition:transform .2s}
+.band::before{content:"";position:absolute;left:0;right:0;top:-12px;height:20px;
+  background:radial-gradient(circle at 20px 20px,var(--c-epi) 18px,transparent 19px) 0 0/40px 20px}
+.band.flash{animation:shield .5s}
+@keyframes shield{30%{transform:scaleY(.78);filter:brightness(1.15)}}
+.band .txt{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-head);font-weight:900;font-size:24px;color:rgba(80,50,0,.65)}
+.fly{position:absolute;top:0;font-size:40px;line-height:1;pointer-events:none;left:var(--x)}
+.fly.down{animation:fallB 1.8s cubic-bezier(.45,0,.6,1) forwards}
+@keyframes fallB{0%{transform:translate(0,-60px) rotate(0)}48%{transform:translate(0,182px) rotate(80deg)}
+  70%{transform:translate(var(--dx),110px) rotate(150deg)}100%{transform:translate(calc(var(--dx)*2),170px) rotate(220deg);opacity:0}}
+.fly.up{top:auto;bottom:-50px;animation:riseB 1.8s cubic-bezier(.45,0,.6,1) forwards}
+@keyframes riseB{0%{transform:translateY(0)}48%{transform:translateY(-252px)}70%{transform:translate(var(--dx),-200px)}100%{transform:translate(calc(var(--dx)*2),-150px);opacity:0}}
+.shieldBtns{display:flex;flex-direction:column;gap:14px}
+.shieldBtns .clay{display:flex;align-items:center;gap:16px;padding:18px 22px;font-size:21px;font-weight:800;text-align:left;border-radius:24px}
+.shieldBtns .clay span{font-size:38px}
+.shieldBtns .clay small{display:block;font-weight:400;font-size:15px;color:var(--ink-soft);margin-top:2px}
+
+/* ---------- slide 5 temperature ---------- */
+#s5 .wrap{display:grid;grid-template-columns:640px 1fr;gap:34px;margin-top:22px}
+#tempScene{width:640px;height:456px;border-radius:30px;box-shadow:0 18px 40px var(--shadow);display:block}
+#tempScene .sky{transition:fill .8s}
+#tempScene.hot .sky{fill:#ffd88a} #tempScene.cold .sky{fill:#cfe9ff}
+#tempScene .vsl{transition:stroke-width .9s cubic-bezier(.3,1.4,.5,1)}
+#tempScene.hot .artery{stroke-width:24} #tempScene.hot .vein{stroke-width:22}
+#tempScene.cold .artery{stroke-width:7} #tempScene.cold .vein{stroke-width:6}
+#tempScene .glow{transition:opacity .8s;opacity:0} #tempScene.hot .glow{opacity:.35}
+#tempScene .sun,#tempScene .waves,#tempScene .drops{transition:opacity .6s;opacity:0}
+#tempScene.hot .sun,#tempScene.hot .waves,#tempScene.hot .drops{opacity:1}
+#tempScene .snow{opacity:0;transition:opacity .6s} #tempScene.cold .snow{opacity:1}
+#tempScene .hairT{transition:transform 1s cubic-bezier(.3,1.5,.5,1);transform-box:view-box;transform-origin:470px 250px;transform:rotate(42deg)}
+#tempScene.cold .hairT{transform:rotate(0deg)}
+#tempScene .drops circle{animation:sweat 2.4s linear infinite;animation-delay:var(--sd)}
+@keyframes sweat{0%{transform:translateY(0);opacity:0}10%{opacity:1}70%{transform:translateY(-190px);opacity:1}100%{transform:translateY(-250px) scale(.3);opacity:0}}
+#tempScene .waves path{animation:wave 2.2s ease-in-out infinite;animation-delay:var(--sd)}
+@keyframes wave{0%{transform:translateY(20px);opacity:0}40%{opacity:.9}100%{transform:translateY(-50px);opacity:0}}
+#tempScene .snow text{animation:snow 3.2s linear infinite;animation-delay:var(--sd)}
+@keyframes snow{from{transform:translateY(-40px)}to{transform:translateY(180px)}}
+.toggle{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.toggle .clay{padding:18px;font-size:26px;font-weight:800;font-family:var(--f-head)}
+.toggle .clay.sel{outline:4px solid var(--on-mat);outline-offset:3px}
+.therm{display:flex;gap:18px;align-items:center;margin:20px 0 16px}
+.therm .box{flex:1;padding:14px 18px;border-radius:22px;background:rgba(255,255,255,.12);color:var(--on-mat)}
+.therm small{display:block;font-size:15px;color:var(--on-mat-soft)}
+.therm b{font-family:var(--f-num);font-size:40px;font-weight:600}
+.steps{margin:0;padding:22px 26px;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;display:flex;gap:14px;align-items:flex-start;font-size:19px;line-height:1.4;padding:8px 0}
+.steps li::before{content:counter(s);font-family:var(--f-num);font-weight:700;flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--sc,var(--c-fat));color:#fff;box-shadow:inset 0 -4px 0 rgba(0,0,0,.18)}
+.steps li{animation:rise .55s cubic-bezier(.2,1.3,.4,1) both;animation-delay:calc(var(--i)*140ms)}
+
+/* ---------- slide 6 feel ---------- */
+#feelWrap{position:relative;margin-top:16px}
+#feelSvg{width:1136px;height:350px;display:block}
+#feelSvg .brain{transition:filter .3s}
+#feelSvg .brain.lit{filter:drop-shadow(0 0 22px var(--pc)) brightness(1.08)}
+.bubble{position:absolute;right:20px;top:-6px;max-width:360px;padding:18px 24px;font-size:22px;font-weight:800;font-family:var(--f-head);
+  border-radius:26px 26px 26px 6px;background:var(--paper);box-shadow:0 14px 30px var(--shadow);transform:scale(0);transform-origin:bottom left;transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+.bubble.show{transform:scale(1)}
+.senses{display:flex;gap:18px;justify-content:center;margin-top:14px}
+.senses .clay{display:flex;align-items:center;gap:12px;padding:16px 28px 18px;font-size:24px;font-weight:800;border-radius:999px}
+.senses .clay span{font-size:34px}
+
+/* ---------- slide 7 numbers ---------- */
+.nums{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:40px}
+.num{padding:30px 30px 28px;border-radius:34px;min-height:400px;display:flex;flex-direction:column}
+.num .big{font-family:var(--f-num);font-weight:700;font-size:88px;line-height:1;letter-spacing:-.02em}
+.num .big sup{font-size:.45em}
+.num .big em{font-style:normal;font-size:.45em;margin-left:6px}
+.num h3{font-family:var(--f-head);font-size:25px;margin:14px 0 6px}
+.num p{margin:0;font-size:18px;line-height:1.45;color:rgba(42,31,26,.78)}
+.num .art{margin-top:auto;height:130px;display:flex;align-items:flex-end;justify-content:center}
+
+/* ---------- slide 8 melanin ---------- */
+#s8 .wrap{display:grid;grid-template-columns:460px 1fr;gap:50px;margin-top:30px;align-items:center}
+#face{width:440px;height:440px;filter:drop-shadow(0 22px 26px rgba(0,0,0,.35))}
+#face .tone{transition:fill .2s}
+#face .freck{transition:opacity .4s;opacity:0} #face.fr .freck{opacity:1}
+.mel{padding:30px 34px}
+.mel h3{font-family:var(--f-head);font-size:28px;margin:0 0 6px}
+.mel p{font-size:19px;line-height:1.5;margin:0 0 18px}
+.zoom{height:120px;border-radius:20px;position:relative;overflow:hidden;background:var(--c-epi);box-shadow:inset 0 -8px 0 rgba(0,0,0,.1)}
+.zoom i{position:absolute;width:12px;height:12px;border-radius:50%;background:#4a2a14;transition:opacity .25s,transform .25s;box-shadow:inset 0 -2px 0 rgba(0,0,0,.3)}
+.zoom i.off{opacity:0;transform:scale(0)}
+.zoom b{position:absolute;left:10px;top:8px;z-index:1;font-size:14px;font-weight:600;color:rgba(0,0,0,.65);background:rgba(255,255,255,.7);padding:3px 10px;border-radius:999px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:30px;border-radius:15px;margin:22px 0 6px;
+  background:linear-gradient(90deg,#f6dcc7,#e2b48e,#c08657,#8a5631,#4e2f1b);box-shadow:inset 0 -5px 0 rgba(0,0,0,.15)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:46px;height:46px;border-radius:50%;background:var(--paper);border:0;box-shadow:inset 0 -6px 0 rgba(0,0,0,.15),0 6px 14px rgba(0,0,0,.3);cursor:grab}
+input[type=range]::-moz-range-thumb{width:46px;height:46px;border-radius:50%;background:var(--paper);border:0;box-shadow:inset 0 -6px 0 rgba(0,0,0,.15),0 6px 14px rgba(0,0,0,.3);cursor:grab}
+input[type=range]:focus-visible{outline:4px solid var(--c-epi);outline-offset:6px}
+.ends{display:flex;justify-content:space-between;font-size:16px;font-weight:600;color:var(--ink-soft)}
+.mel .clay{margin-top:20px;padding:12px 22px;font-weight:800;font-size:18px;border-radius:999px}
+.mel .clay.sel{--bc:#f4c9a8}
+
+/* ---------- slide 9 facts ---------- */
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;margin-top:22px;perspective:1200px}
+.card{height:222px;position:relative;cursor:pointer;border:0;background:none;padding:0;font:inherit;color:inherit}
+.card:focus-visible{outline:4px solid var(--c-epi);outline-offset:4px;border-radius:26px}
+.card .in{position:absolute;inset:0;transition:transform .65s cubic-bezier(.3,1.3,.5,1);transform-style:preserve-3d}
+.card.flip .in{transform:rotateY(180deg)}
+.card .f,.card .b{position:absolute;inset:0;border-radius:26px;backface-visibility:hidden;-webkit-backface-visibility:hidden;padding:18px 18px;display:flex;flex-direction:column;text-align:left;
+  box-shadow:inset 0 -8px 0 rgba(0,0,0,.14), inset 0 5px 0 rgba(255,255,255,.45), 0 12px 24px var(--shadow)}
+.card .f{background:var(--cc)}
+.card .f .n{font-family:var(--f-num);font-weight:700;font-size:22px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.6)}
+.card .f .e{font-size:58px;line-height:1;margin:auto 0 10px}
+.card .f .e svg{width:62px;height:62px}
+.card .f h4{margin:0;font-family:var(--f-head);font-size:19px;line-height:1.2}
+.card .b{background:var(--paper);transform:rotateY(180deg);font-size:15.5px;line-height:1.4;justify-content:center;border:5px solid var(--cc)}
+.cardsBar{display:flex;gap:22px;align-items:center;margin-top:14px}
+.cardsBar .clay{padding:10px 22px 12px;font-weight:800;border-radius:999px;font-size:17px}
+
+/* ---------- slide 10 quiz ---------- */
+#quiz{position:relative;margin:30px auto 0;width:900px;padding:40px 46px 36px}
+#quiz .qn{font-family:var(--f-num);font-weight:600;color:var(--ink-soft);font-size:18px}
+#quiz h3{font-family:var(--f-head);font-size:36px;margin:8px 0 28px;line-height:1.2}
+.opts{display:grid;gap:14px}
+.opts .clay{padding:18px 24px;text-align:left;font-size:23px;font-weight:600;--bc:var(--paper-2);border-radius:20px}
+.opts .clay.ok{--bc:#7fd36b}
+.opts .clay.no{--bc:#f3a0a6;animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+.qfoot{display:flex;justify-content:space-between;align-items:center;margin-top:24px;min-height:52px}
+.qfoot .msg{font-size:21px;font-weight:800}
+.qfoot .clay{padding:12px 26px 14px;font-weight:800;border-radius:999px;--bc:var(--c-epi);font-size:19px}
+.qdots{display:flex;gap:8px;justify-content:center;margin-top:18px}
+.qdots i{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.25)}
+.qdots i.done{background:var(--c-gland)} .qdots i.cur{background:var(--c-epi)}
+.conf{position:absolute;width:14px;height:14px;border-radius:50%;left:50%;top:50%;pointer-events:none;animation:burst 1s cubic-bezier(.1,.8,.3,1) forwards}
+@keyframes burst{to{transform:translate(var(--tx),var(--ty)) scale(.4);opacity:0}}
+
+/* ---------- slide 11 care ---------- */
+.care{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:34px}
+.tip{display:flex;gap:18px;align-items:center;min-height:170px;padding:24px 26px;border-radius:30px;background:var(--paper);box-shadow:0 14px 30px var(--shadow)}
+.tip .ic{flex:none;width:84px;height:84px;border-radius:50%;display:grid;place-items:center;font-size:44px;background:var(--tc);box-shadow:inset 0 -7px 0 rgba(0,0,0,.14), inset 0 5px 0 rgba(255,255,255,.45)}
+.tip h4{margin:0 0 4px;font-family:var(--f-head);font-size:22px;line-height:1.2}
+.tip p{margin:0;font-size:16px;color:var(--ink-soft);line-height:1.4}
+
+/* ---------- slide 12 end ---------- */
+#s12{display:grid;grid-template-columns:1fr 440px;gap:30px;align-items:center}
+#s12 h1{font-size:74px;line-height:1.02;font-weight:900}
+#s12 .q{margin-top:40px;display:inline-flex;align-items:center;gap:14px;padding:18px 30px 20px;font-size:32px;font-weight:800;font-family:var(--f-head);--bc:var(--c-epi);border-radius:999px}
+#s12 svg{width:440px;height:400px;animation:bob 4s ease-in-out infinite;filter:drop-shadow(0 26px 30px rgba(0,0,0,.35))}
+@keyframes bob{50%{transform:translateY(-12px) rotate(-1.5deg)}}
+
+/* ---------- chrome ---------- */
+#nav{position:fixed;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;align-items:center;
+  padding:8px;border-radius:999px;background:rgba(15,45,32,.72);backdrop-filter:blur(8px);transition:opacity .5s;z-index:10}
+#nav.idle{opacity:.12}
+#nav button{border:0;cursor:pointer;width:40px;height:40px;border-radius:50%;font-size:20px;background:var(--paper);color:var(--ink);
+  box-shadow:inset 0 -5px 0 rgba(0,0,0,.15), inset 0 3px 0 rgba(255,255,255,.5)}
+#nav button:active{transform:translateY(2px)}
+#nav button:focus-visible{outline:3px solid var(--c-epi);outline-offset:3px}
+#count{font-family:var(--f-num);font-weight:600;color:var(--on-mat);min-width:70px;text-align:center;font-size:18px}
+#bar{position:fixed;left:0;top:env(safe-area-inset-top,0px);height:8px;width:0;z-index:10;transition:width .5s cubic-bezier(.3,1.2,.5,1);
+  background:linear-gradient(var(--c-epi) 0 33%,var(--c-dermis) 33% 66%,var(--c-fat) 66%);border-radius:0 6px 6px 0}
+#pal{position:fixed;right:14px;bottom:76px;width:330px;padding:20px 22px;z-index:11;display:none}
+#pal.open{display:block;animation:infoIn .3s}
+#pal h4{margin:0 0 4px;font-family:var(--f-head);font-size:20px}
+#pal p{margin:0 0 12px;font-size:14px;color:var(--ink-soft)}
+#pal label{display:flex;align-items:center;justify-content:space-between;padding:5px 0;font-size:15px;font-weight:600}
+#pal input[type=color]{width:48px;height:30px;border:0;border-radius:10px;padding:0;background:none;cursor:pointer}
+#pal .clay{margin-top:12px;padding:8px 16px 10px;border-radius:999px;font-size:14px;font-weight:800;--bc:var(--paper-2)}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<div id="mat"></div>
+<svg id="print" viewBox="0 0 200 240" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" aria-hidden="true"></svg>
+<!-- shared defs -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="clay" x="-15%" y="-15%" width="130%" height="130%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="b"/>
+      <feSpecularLighting in="b" surfaceScale="5" specularConstant=".55" specularExponent="16" lighting-color="#ffffff" result="s">
+        <fePointLight x="-300" y="-400" z="380"/>
+      </feSpecularLighting>
+      <feComposite in="s" in2="SourceAlpha" operator="in" result="si"/>
+      <feComposite in="SourceGraphic" in2="si" operator="arithmetic" k1="0" k2="1" k3=".9" k4="0"/>
+    </filter>
+  </defs>
+</svg>
+
+<div id="bar"></div>
+<div id="viewport"><div id="stage">
+
+<!-- 1 TITLE -->
+<section class="slide" id="s1">
+  <div>
+    <h1 class="r" style="--d:0">Մարդու<br>մաշկը</h1>
+    <div class="tag r" style="--d:2">Մեր մարմնի պաշտպանիչ վահանը</div>
+    <div class="stack r" style="--d:3">
+      <span style="width:120px;background:var(--c-epi)"></span>
+      <span style="width:90px;background:var(--c-dermis)"></span>
+      <span style="width:70px;background:var(--c-fat)"></span>
+      <span style="width:50px;background:var(--c-deep)"></span>
+    </div>
+    <div class="hint r" style="--d:5">Առաջ գնալու համար սեղմիր ▶ կամ → սլաքը</div>
+  </div>
+  <svg class="skin build" data-skin viewBox="0 -10 600 540" role="img" aria-label="Մաշկի կտրվածքի մոդել"></svg>
+</section>
+
+<!-- 2 FUNCTIONS -->
+<section class="slide" id="s2">
+  <div class="chip r"><b>1</b>Ներածություն</div>
+  <h2 class="r" style="--d:1">Ի՞նչ է անում մաշկը</h2>
+  <div class="funcs">
+    <button class="clay func r" style="--d:2;--bc:#f7d23e" data-go="2"><div class="ic">🧥</div><h3>Ծածկում է մարմինը</h3><p>Մեր մարմնի «վերարկուն» է՝ գլխից մինչև ոտքեր։</p><div class="go">Շերտերը</div></button>
+    <button class="clay func r" style="--d:3;--bc:#ff9aa0" data-go="3"><div class="ic">🛡️</div><h3>Պաշտպանում է</h3><p>Մանրէներից, վնասվածքներից և ջուր կորցնելուց։</p><div class="go">Վահանը</div></button>
+    <button class="clay func r" style="--d:4;--bc:#ffbf7a" data-go="4"><div class="ic">🌡️</div><h3>Կարգավորում է ջերմաստիճանը</h3><p>Չի թողնում, որ շատ տաքանանք կամ սառչենք։</p><div class="go">Շոգ և ցուրտ</div></button>
+    <button class="clay func r" style="--d:5;--bc:#9fdc8f" data-go="5"><div class="ic">👆</div><h3>Օգնում է զգալ</h3><p>Հպում, տաք, սառը, ցավ։</p><div class="go">Զգացողություններ</div></button>
+  </div>
+</section>
+
+<!-- 3 LAYERS -->
+<section class="slide" id="s3">
+  <div class="chip r"><b>2</b>Կառուցվածքը</div>
+  <h2 class="r" style="--d:1">Ինչպե՞ս է կառուցված մաշկը</h2>
+  <div class="wrap">
+    <svg id="layerSkin" class="skin r" style="--d:2" data-skin viewBox="0 -10 600 540" role="img" aria-label="Մաշկի շերտերը"></svg>
+    <div class="side">
+      <div class="stackBtns r" style="--d:3">
+        <button class="clay" data-sel="epi" style="--bc:var(--c-epi)"><i>1</i>Էպիդերմիս</button>
+        <button class="clay" data-sel="dermis" style="--bc:var(--c-dermis);color:#fff"><i>2</i>Դերմիս</button>
+        <button class="clay" data-sel="fat" style="--bc:var(--c-fat)"><i>3</i>Ենթամաշկային ճարպային շերտ</button>
+        <button class="clay" data-sel="deep" style="--bc:var(--c-deep)"><i>0</i>Խորքային հյուսվածք</button>
+      </div>
+      <div class="parts r" style="--d:4">
+        <button class="clay" data-sel="hair"><span class="dot" style="--dc:var(--c-root)"></span>Մազ</button>
+        <button class="clay" data-sel="gland"><span class="dot" style="--dc:var(--c-gland)"></span>Քրտնագեղձ</button>
+        <button class="clay" data-sel="nerve"><span class="dot" style="--dc:var(--c-nerve)"></span>Նյարդեր</button>
+        <button class="clay" data-sel="artery"><span class="dot" style="--dc:var(--c-artery)"></span>Զարկերակ</button>
+        <button class="clay" data-sel="vein"><span class="dot" style="--dc:var(--c-vein)"></span>Երակ</button>
+        <button class="clay" data-sel="all" style="--bc:var(--paper-2)">Ամբողջը</button>
+      </div>
+      <div class="info paper r" id="info" style="--d:5"><div class="swatch"></div><small></small><h3></h3><p></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 SHIELD -->
+<section class="slide" id="s4">
+  <div class="chip r"><b>3</b>Պաշտպանություն</div>
+  <h2 class="r" style="--d:1">Մաշկը՝ պաշտպանիչ վահան</h2>
+  <div class="wrap">
+    <div class="arena r" id="arena" style="--d:2">
+      <div class="lab" style="top:18px">Դրսում</div>
+      <div class="lab" style="bottom:18px">Մարմնի ներսում</div>
+      <div class="band" id="band"><div class="txt">Էպիդերմիս</div></div>
+    </div>
+    <div class="shieldBtns">
+      <p class="hint r" style="--d:2;margin:0 0 4px">Սեղմիր և տես, թե ինչից է պաշտպանում</p>
+      <button class="clay r" style="--d:3;--bc:#ffe9a8" data-shield="hit"><span>🪨</span><div>Վնասվածքներից<small>Հարվածներ, քերծվածքներ</small></div></button>
+      <button class="clay r" style="--d:4;--bc:#c9f0bd" data-shield="germ"><span>🦠</span><div>Մանրէներից<small>Չեն կարողանում ներս մտնել</small></div></button>
+      <button class="clay r" style="--d:5;--bc:#cfe9ff" data-shield="env"><span>🌬️</span><div>Արտաքին միջավայրից<small>Քամի, ցուրտ, արև, փոշի</small></div></button>
+      <button class="clay r" style="--d:6;--bc:#ffd0d4" data-shield="water"><span>💧</span><div>Ջրի կորստից<small>Ջուրը մնում է մարմնի ներսում</small></div></button>
+    </div>
+  </div>
+</section>
+
+<!-- 5 TEMPERATURE -->
+<section class="slide" id="s5">
+  <div class="chip r"><b>4</b>Ջերմաստիճան</div>
+  <h2 class="r" style="--d:1;font-size:39px">Ինչպե՞ս է մաշկը կարգավորում ջերմաստիճանը</h2>
+  <div class="wrap">
+    <svg id="tempScene" class="hot r" style="--d:2" viewBox="0 0 660 470" role="img" aria-label="Մաշկը շոգին և ցրտին">
+      <rect class="sky" x="0" y="0" width="660" height="200" fill="#ffd88a"/>
+      <g class="sun"><circle cx="580" cy="72" r="40" fill="#ffb21f"/><circle cx="580" cy="72" r="56" fill="#ffb21f" opacity=".25"/></g>
+      <g class="snow" font-size="28" fill="#fff">
+        <text x="80" y="20" style="--sd:0s">❄</text><text x="220" y="0" style="--sd:-1.2s">❄</text><text x="360" y="10" style="--sd:-2.1s">❄</text><text x="520" y="0" style="--sd:-.6s">❄</text><text x="600" y="10" style="--sd:-1.8s">❄</text>
+      </g>
+      <g class="waves" fill="none" stroke="#ff7a2b" stroke-width="5" stroke-linecap="round">
+        <path style="--sd:0s" d="M120 160 q10 -14 0 -28 q-10 -14 0 -28"/><path style="--sd:-.7s" d="M330 160 q10 -14 0 -28 q-10 -14 0 -28"/><path style="--sd:-1.4s" d="M560 160 q10 -14 0 -28 q-10 -14 0 -28"/>
+      </g>
+      <g filter="url(#clay)">
+        <rect x="0" y="236" width="660" height="234" fill="var(--c-dermis)"/>
+        <rect class="glow" x="0" y="236" width="660" height="234" fill="#ffb03a"/>
+        <path id="tempEpi" fill="var(--c-epi)"/>
+        <path class="vsl artery" d="M0 360 C120 340 220 380 340 358 S540 340 660 362" stroke="var(--c-artery)" stroke-width="14" fill="none" stroke-linecap="round"/>
+        <path class="vsl vein" d="M0 400 C130 420 240 384 350 400 S560 420 660 396" stroke="var(--c-vein)" stroke-width="13" fill="none" stroke-linecap="round"/>
+        <path d="M230 236 L230 410" stroke="var(--c-gland)" stroke-width="12" stroke-linecap="round"/>
+        <circle cx="230" cy="420" r="30" fill="var(--c-gland)"/>
+        <path d="M230 420 m-4 0 a4 4 0 1 1 8 0 a8 8 0 1 1 -16 0 a12 12 0 1 1 24 0 a16 16 0 1 1 -32 0 a20 20 0 1 1 40 0" stroke="rgba(0,70,0,.35)" stroke-width="3" fill="none"/>
+      </g>
+      <rect x="221" y="186" width="18" height="54" rx="9" fill="#d9a92a"/>
+      <g class="drops" fill="#7cc9ff">
+        <circle cx="230" cy="400" r="9" style="--sd:0s"/><circle cx="230" cy="400" r="8" style="--sd:-.8s"/><circle cx="230" cy="400" r="9" style="--sd:-1.6s"/>
+      </g>
+      <g class="hairT" filter="url(#clay)">
+        <path d="M470 252 C468 180 474 110 480 50" stroke="var(--c-hair)" stroke-width="14" fill="none" stroke-linecap="round"/>
+        <ellipse cx="470" cy="262" rx="14" ry="18" fill="var(--c-root)"/>
+      </g>
+      <g font-family="Noto Sans Armenian, sans-serif" font-size="17" font-weight="800" fill="#fff">
+        <text x="270" y="300">Քրտնագեղձ</text>
+        <text x="400" y="452">Արյունատար անոթներ</text>
+      </g>
+    </svg>
+    <div>
+      <div class="toggle r" style="--d:3">
+        <button class="clay sel" data-temp="hot" style="--bc:#ffc04d">☀️ Շոգ</button>
+        <button class="clay" data-temp="cold" style="--bc:#bfe3ff">❄️ Ցուրտ</button>
+      </div>
+      <div class="therm r" style="--d:4">
+        <div class="box"><small>Դրսում</small><b id="outT">+35°</b></div>
+        <div class="box"><small>Մարմնի ներսում</small><b>36.6°</b></div>
+      </div>
+      <ol class="steps paper r" id="steps" style="--d:5"></ol>
+    </div>
+  </div>
+</section>
+
+<!-- 6 FEEL -->
+<section class="slide" id="s6">
+  <div class="chip r"><b>5</b>Զգացողություններ</div>
+  <h2 class="r" style="--d:1">Ինչպե՞ս ենք մենք զգում մաշկով</h2>
+  <div id="feelWrap" class="r" style="--d:2">
+    <svg id="feelSvg" viewBox="0 0 1136 420" role="img" aria-label="Ազդանշանը մաշկից դեպի ուղեղ">
+      <g filter="url(#clay)">
+        <rect x="40" y="250" width="330" height="40" fill="var(--c-fat)" rx="6"/>
+        <rect x="40" y="168" width="330" height="90" fill="var(--c-dermis)"/>
+        <path id="feelEpi" fill="var(--c-epi)"/>
+      </g>
+      <path id="nervePath" d="M205 236 C300 240 330 330 470 318 S720 240 800 196" fill="none" stroke="var(--c-nerve)" stroke-width="10" stroke-linecap="round"/>
+      <g fill="none" stroke="var(--c-nerve)" stroke-width="6" stroke-linecap="round">
+        <path d="M205 236 C170 222 120 196 100 158"/><path d="M205 236 C205 210 200 186 190 156"/><path d="M205 236 C240 216 270 196 290 158"/>
+        <path d="M150 210 l-14 -40"/><path d="M262 196 l20 -36"/>
+      </g>
+      <path id="nerveGlow" d="M205 236 C300 240 330 330 470 318 S720 240 800 196" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-dasharray="0 2000" opacity=".9"/>
+      <g class="brain" id="brain" filter="url(#clay)">
+        <path d="M800 110 C800 50 870 26 920 44 C960 10 1040 22 1056 74 C1100 92 1104 160 1070 190 C1078 236 1020 262 980 246 C950 276 880 270 862 238 C810 238 784 196 800 166 C778 146 782 120 800 110 Z" fill="#f4a3b4"/>
+        <path d="M850 90 c20 -10 40 10 30 30 M920 70 c10 30 -20 40 -10 70 M990 66 c-20 20 10 40 -6 64 M1040 110 c-30 0 -30 40 -60 40 M880 200 c20 -20 50 -10 60 -30 M1000 210 c10 -20 40 -20 40 -46" stroke="#d9748b" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <path d="M955 250 C952 290 960 330 930 380" stroke="#f4a3b4" stroke-width="30" stroke-linecap="round" fill="none"/>
+      </g>
+      <circle id="pulse" r="15" cx="205" cy="236" fill="#fff" opacity="0"/>
+      <text id="stim" x="205" y="132" font-size="78" text-anchor="middle" opacity="0"></text>
+      <g font-family="Noto Sans Armenian, sans-serif" font-weight="800" font-size="20" fill="var(--on-mat)">
+        <text x="40" y="330">Մաշկ</text><text x="530" y="365">Նյարդ</text><text x="1000" y="400">Ուղեղ</text>
+      </g>
+    </svg>
+    <div class="bubble" id="bubble"></div>
+  </div>
+  <div class="senses r" style="--d:3">
+    <button class="clay" data-sense="touch" style="--bc:#ffe27a"><span>👆</span>Հպում</button>
+    <button class="clay" data-sense="hot" style="--bc:#ffa77a"><span>🔥</span>Տաք</button>
+    <button class="clay" data-sense="cold" style="--bc:#a8dcff"><span>🧊</span>Սառը</button>
+    <button class="clay" data-sense="pain" style="--bc:#b6e39a"><span>🌵</span>Ցավ</button>
+  </div>
+</section>
+
+<!-- 7 NUMBERS -->
+<section class="slide" id="s7">
+  <div class="chip r"><b>6</b>Հետաքրքիր փաստեր</div>
+  <h2 class="r" style="--d:1">Մաշկը մարմնի ամենամեծ օրգանն է</h2>
+  <div class="nums">
+    <div class="clay num r" style="--d:2;--bc:var(--c-epi);cursor:default">
+      <div class="big">≈2<em>մ²</em></div>
+      <h3>Մակերեսը</h3><p>Մեծահասակի մաշկը կծածկեր մոտավորապես մեկ դուռ։</p>
+      <div class="art"><svg width="120" height="130" viewBox="0 0 120 130"><rect x="20" y="4" width="80" height="124" rx="8" fill="#8a5631"/><rect x="30" y="14" width="60" height="48" rx="4" fill="#a86c40"/><rect x="30" y="70" width="60" height="48" rx="4" fill="#a86c40"/><circle cx="84" cy="70" r="5" fill="#ffd34d"/></svg></div>
+    </div>
+    <div class="clay num r" style="--d:3;--bc:#ff8a93;cursor:default">
+      <div class="big">3–4<em>կգ</em></div>
+      <h3>Քաշը</h3><p>Մաշկը մոտ երկու անգամ ավելի ծանր է, քան ուղեղը։</p>
+      <div class="art" style="font-size:96px;gap:10px;align-items:center">🧠<span style="font-family:var(--f-num);font-size:50px;font-weight:700">×2</span></div>
+    </div>
+    <div class="clay num r" style="--d:4;--bc:#ffb766;cursor:default">
+      <div class="big">0.5–4<em>մմ</em></div>
+      <h3>Հաստությունը</h3><p>Ամենաբարակը կոպերին է, ամենահաստը՝ ոտքի ներբաններին։</p>
+      <div class="art" style="gap:40px;align-items:flex-end">
+        <div style="text-align:center"><div style="width:90px;height:6px;border-radius:3px;background:var(--c-epi);box-shadow:0 2px 0 rgba(0,0,0,.2)"></div><div style="font-size:42px;margin-top:8px">👁️</div></div>
+        <div style="text-align:center"><div style="width:90px;height:44px;border-radius:10px;background:var(--c-epi);box-shadow:inset 0 -6px 0 rgba(0,0,0,.15)"></div><div style="font-size:42px;margin-top:8px">🦶</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 MELANIN -->
+<section class="slide" id="s8">
+  <div class="chip r"><b>6</b>Հետաքրքիր փաստեր</div>
+  <h2 class="r" style="--d:1">Ինչի՞ց է կախված մաշկի գույնը</h2>
+  <div class="wrap">
+    <svg id="face" class="r" style="--d:2" viewBox="0 0 440 440" role="img" aria-label="Դեմք, որի գույնը փոխվում է">
+      <g filter="url(#clay)">
+        <circle cx="70" cy="200" r="38" class="tone"/><circle cx="370" cy="200" r="38" class="tone"/>
+        <circle cx="220" cy="220" r="170" class="tone"/>
+        <path d="M60 170 C60 50 380 50 380 170 C350 110 300 90 220 96 C140 90 90 110 60 170Z" fill="#3b2416"/>
+      </g>
+      <ellipse cx="160" cy="210" rx="16" ry="22" fill="#2a1f1a"/><ellipse cx="280" cy="210" rx="16" ry="22" fill="#2a1f1a"/>
+      <circle cx="165" cy="203" r="5" fill="#fff"/><circle cx="285" cy="203" r="5" fill="#fff"/>
+      <path d="M160 290 Q220 340 280 290" stroke="#2a1f1a" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <ellipse cx="128" cy="262" rx="26" ry="14" fill="#ff6d7a" opacity=".35"/><ellipse cx="312" cy="262" rx="26" ry="14" fill="#ff6d7a" opacity=".35"/>
+      <g class="freck" fill="#7a4520" opacity=".8">
+        <circle cx="120" cy="240" r="4"/><circle cx="136" cy="252" r="3.5"/><circle cx="112" cy="258" r="3"/><circle cx="146" cy="238" r="3"/><circle cx="196" cy="246" r="3"/>
+        <circle cx="320" cy="240" r="4"/><circle cx="304" cy="252" r="3.5"/><circle cx="328" cy="258" r="3"/><circle cx="294" cy="238" r="3"/><circle cx="244" cy="246" r="3"/>
+      </g>
+    </svg>
+    <div class="mel paper r" style="--d:3">
+      <h3>Մելանին</h3>
+      <p>Որքան շատ մելանին կա մաշկում, այնքան մուգ է մաշկի գույնը։ Մելանինը նաև պաշտպանում է մաշկն արևից։</p>
+      <div class="zoom" id="zoom"><b>Մելանինը խոշորացույցով 🔍</b></div>
+      <input type="range" id="melR" min="0" max="100" value="35" aria-label="Մելանինի քանակը">
+      <div class="ends"><span>Քիչ մելանին</span><span>Շատ մելանին</span></div>
+      <button class="clay" id="frBtn">Ավելացնել պեպեններ</button>
+    </div>
+  </div>
+</section>
+
+<!-- 9 FACT CARDS -->
+<section class="slide" id="s9">
+  <div class="chip r"><b>6</b>Հետաքրքիր փաստեր</div>
+  <h2 class="r" style="--d:1">Եվս 10 փաստ մաշկի մասին</h2>
+  <div class="cards" id="cards"></div>
+  <div class="cardsBar r" style="--d:6"><button class="clay" id="flipAll" style="--bc:var(--c-epi)">Շրջել բոլորը</button><span class="hint">Կամ սեղմիր առանձին քարտի վրա</span></div>
+</section>
+
+<!-- 10 QUIZ -->
+<section class="slide" id="s10">
+  <div class="chip r"><b>7</b>Վիկտորինա</div>
+  <h2 class="r" style="--d:1">Ստուգենք, թե ինչ հիշեցինք</h2>
+  <div id="quiz" class="paper r" style="--d:2">
+    <div class="qn" id="qn"></div><h3 id="qq"></h3><div class="opts" id="qo"></div>
+    <div class="qfoot"><div class="msg" id="qm"></div><button class="clay" id="qnext" hidden>Հաջորդ հարցը</button></div>
+  </div>
+  <div class="qdots" id="qd"></div>
+</section>
+
+<!-- 11 CARE -->
+<section class="slide" id="s11">
+  <div class="chip r"><b>8</b>Խնամք</div>
+  <h2 class="r" style="--d:1">Ինչպե՞ս խնամել մաշկը</h2>
+  <div class="care">
+    <div class="tip r" style="--d:2;--tc:#ffe27a"><div class="ic">🧴</div><div><h4>Օգտագործիր արևապաշտպան քսուք</h4><p>Պաշտպանում է արևայրուքից</p></div></div>
+    <div class="tip r" style="--d:3;--tc:#bfe3ff"><div class="ic">🧼</div><div><h4>Հաճախ լվա ձեռքերդ</h4><p>Հեռու ենք պահում մանրէներին</p></div></div>
+    <div class="tip r" style="--d:4;--tc:#a8dcff"><div class="ic">💧</div><div><h4>Շատ ջուր խմիր</h4><p>Մաշկը չի չորանում</p></div></div>
+    <div class="tip r" style="--d:5;--tc:#ffb766"><div class="ic">🥕</div><div><h4>Կեր մրգեր և բանջարեղեն</h4><p>Վիտամիններ մաշկի համար</p></div></div>
+    <div class="tip r" style="--d:6;--tc:#ff9aa0"><div class="ic">🩹</div><div><h4>Մաքրիր և փակիր վերքերը</h4><p>Որ մանրէներ չմտնեն</p></div></div>
+    <div class="tip r" style="--d:7;--tc:#c9b3f0"><div class="ic">😴</div><div><h4>Լավ քնիր</h4><p>Քնի ժամանակ մաշկը վերականգնվում է</p></div></div>
+  </div>
+</section>
+
+<!-- 12 END -->
+<section class="slide" id="s12">
+  <div>
+    <h1 class="r">Շնորհակալություն<br>լսելու համար</h1>
+    <div class="clay q r" style="--d:2;cursor:default">❓ Հարցեր ունե՞ք</div>
+  </div>
+  <svg class="skin r" style="--d:1" data-skin viewBox="0 -10 600 540" aria-hidden="true"></svg>
+</section>
+
+</div></div>
+
+<nav id="nav" aria-label="Սլայդներ">
+  <button id="prev" aria-label="Նախորդ">◀</button>
+  <div id="count">1 / 12</div>
+  <button id="next" aria-label="Հաջորդ">▶</button>
+  <button id="palBtn" aria-label="Գույներ" title="Գույներ">🎨</button>
+  <button id="fsBtn" aria-label="Ամբողջ էկրան" title="Ամբողջ էկրան (F)">⛶</button>
+</nav>
+<div id="pal" class="paper">
+  <h4>Մոդելի գույները</h4>
+  <p>Փոխիր գույները, որ համապատասխանեն քո պլաստիլինե մոդելին։</p>
+  <div id="palList"></div>
+  <button class="clay" id="palReset">Վերադարձնել սկզբնականը</button>
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+
+/* ---------- helpers ---------- */
+function rng(seed){return()=>((seed=(seed*16807)%2147483647)-1)/2147483646}
+function bumps(x0,x1,yTop,yBase,step,amp,r){
+  let d=`M${x0} ${yBase} L${x0} ${yTop+amp*.5}`;
+  for(let x=x0;x<x1;x+=step){const nx=Math.min(x+step,x1);d+=` Q${x+step/2} ${yTop-amp*(.6+r()*.6)} ${nx} ${yTop+amp*.5}`}
+  return d+` L${x1} ${yBase} Z`;
+}
+
+/* ---------- skin model (matches the play-doh demo) ---------- */
+function skinSVG(p,seed){
+  const r=rng(seed);
+  let fat='';for(let row=0;row<4;row++){const y=348+row*28,off=row%2?18:0;for(let x=62+off;x<560;x+=36)fat+=`<circle cx="${x+r()*4-2}" cy="${y+r()*4-2}" r="${16+r()*3}"/>`}
+  let deep='';for(let row=0;row<6;row++){const y=448+row*13,off=row%2?9:0;for(let x=62+off;x<550;x+=18)deep+=`<circle cx="${x+r()*3}" cy="${y+r()*3}" r="${8+r()*2}"/>`}
+  const D=(n)=>`style="--bd:${n}s"`;
+  return `
+  <defs>
+    <clipPath id="${p}f"><rect x="60" y="332" width="480" height="112"/></clipPath>
+    <clipPath id="${p}d"><rect x="60" y="440" width="480" height="76" rx="20"/></clipPath>
+    <linearGradient id="${p}h" gradientUnits="userSpaceOnUse" x1="0" y1="300" x2="0" y2="0">
+      <stop offset="0" stop-color="var(--c-root)"/><stop offset=".5" stop-color="var(--c-root)"/><stop offset=".58" stop-color="var(--c-hair)"/><stop offset="1" stop-color="var(--c-hair)"/>
+    </linearGradient>
+  </defs>
+  <g class="part" data-part="deep" filter="url(#clay)" ${D(.15)}>
+    <rect x="60" y="440" width="480" height="76" rx="20" fill="var(--c-deep)"/>
+    <g clip-path="url(#${p}d)" fill="var(--c-deep)" stroke="rgba(0,0,0,.09)" stroke-width="1.5">${deep}</g>
+  </g>
+  <g class="part" data-part="fat" filter="url(#clay)" ${D(.4)}>
+    <rect x="60" y="332" width="480" height="112" fill="var(--c-fat)"/>
+    <g clip-path="url(#${p}f)" fill="var(--c-fat)" stroke="rgba(120,40,0,.2)" stroke-width="2">${fat}</g>
+  </g>
+  <g class="part" data-part="dermis" filter="url(#clay)" ${D(.65)}>
+    <rect x="60" y="128" width="480" height="206" fill="var(--c-dermis)"/>
+  </g>
+  <g class="part" data-part="artery" filter="url(#clay)" fill="none" stroke="var(--c-artery)" stroke-linecap="round" ${D(.9)}>
+    <path d="M62 284 C150 266 220 300 300 284 S450 266 538 288" stroke-width="13"/>
+    <path d="M210 288 C204 258 222 240 214 214" stroke-width="7"/>
+  </g>
+  <g class="part" data-part="vein" filter="url(#clay)" fill="none" stroke="var(--c-vein)" stroke-linecap="round" ${D(1)}>
+    <path d="M62 318 C150 334 230 300 310 316 S460 334 538 312" stroke-width="13"/>
+    <path d="M410 320 C416 290 398 266 406 238" stroke-width="7"/>
+  </g>
+  <g class="part" data-part="nerve" filter="url(#clay)" fill="none" stroke="var(--c-nerve)" stroke-width="5" stroke-linecap="round" ${D(1.1)}>
+    <path d="M70 300 C160 294 240 306 330 298 S470 300 530 306"/>
+    <path d="M240 300 C236 270 222 250 212 168 M226 250 C240 230 252 214 262 186 M216 200 l-18 -22 M216 200 l14 -26"/>
+    <path d="M430 300 C436 270 446 250 432 170 M444 240 C460 222 474 206 486 184 M434 196 l-18 -24 M434 196 l16 -24"/>
+  </g>
+  <g class="part" data-part="gland" filter="url(#clay)" ${D(1.2)}>
+    <path d="M150 232 C138 210 162 190 150 168 S146 140 152 126" stroke="var(--c-gland)" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <circle cx="150" cy="262" r="30" fill="var(--c-gland)"/>
+    <path d="M150 262 m-4 0 a4 4 0 1 1 8 0 a8 8 0 1 1 -16 0 a12 12 0 1 1 24 0 a16 16 0 1 1 -32 0 a20 20 0 1 1 40 0" stroke="rgba(0,70,0,.35)" stroke-width="3" fill="none"/>
+  </g>
+  <g class="part" data-part="epi" filter="url(#clay)" ${D(1.35)}>
+    <path d="${bumps(60,540,84,134,26,7,r)}" fill="var(--c-epi)"/>
+  </g>
+  <g class="part" data-part="hair" filter="url(#clay)" ${D(1.6)}>
+    <path d="M306 134 L310 284 Q333 352 356 284 L360 134 Z" fill="var(--c-sheath)"/>
+    <path d="M333 300 C331 230 331 170 340 110 S368 34 396 6" stroke="url(#${p}h)" stroke-width="20" fill="none" stroke-linecap="round"/>
+    <ellipse cx="333" cy="304" rx="27" ry="34" fill="var(--c-root)"/>
+    <path d="M192 186 C192 140 184 90 202 30" stroke="url(#${p}h)" stroke-width="12" fill="none" stroke-linecap="round"/>
+    <ellipse cx="192" cy="186" rx="10" ry="13" fill="var(--c-root)"/>
+    <path d="M470 186 C472 130 488 80 518 40" stroke="url(#${p}h)" stroke-width="12" fill="none" stroke-linecap="round"/>
+    <ellipse cx="470" cy="186" rx="10" ry="13" fill="var(--c-root)"/>
+  </g>`;
+}
+$$('svg[data-skin]').forEach((s,i)=>s.innerHTML=skinSVG('k'+i,11+i*7));
+$('#tempEpi').setAttribute('d',bumps(0,660,196,240,30,8,rng(5)));
+$('#feelEpi').setAttribute('d',bumps(40,370,150,176,24,6,rng(9)));
+
+/* fingerprint watermark + icon */
+function fpPaths(cx,cy){let d='';for(let i=1;i<10;i++){const rx=i*9,ry=i*11;d+=`<path d="M${cx-rx} ${cy+ry*.4} A${rx} ${ry} 0 1 1 ${cx+rx} ${cy+ry*.2}"/>`}return d}
+$('#print').innerHTML=fpPaths(100,120);
+const fpIcon=`<svg viewBox="0 0 200 240" fill="none" stroke="#2a1f1a" stroke-width="9" stroke-linecap="round">${fpPaths(100,120)}</svg>`;
+
+/* ---------- navigation ---------- */
+const slides=$$('.slide'); let cur=0;
+const stage=$('#stage');
+function fit(){const s=Math.min(innerWidth/1280,innerHeight/720);stage.style.transform=`translate(-50%,-50%) scale(${s})`}
+addEventListener('resize',fit);fit();
+function go(n){
+  n=Math.max(0,Math.min(slides.length-1,n));
+  slides[cur].classList.remove('active');cur=n;slides[cur].classList.add('active');
+  $('#count').textContent=`${cur+1} / ${slides.length}`;
+  $('#bar').style.width=((cur+1)/slides.length*100)+'%';
+  try{history.replaceState(null,'','#'+(cur+1))}catch(e){}
+  onEnter(slides[cur].id);
+}
+$('#prev').onclick=()=>go(cur-1);$('#next').onclick=()=>go(cur+1);
+$$('[data-go]').forEach(b=>b.onclick=()=>go(+b.dataset.go));
+addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  if(['ArrowRight','PageDown'].includes(e.key)||(e.key===' '&&e.target===document.body)){e.preventDefault();go(cur+1)}
+  else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();go(cur-1)}
+  else if(e.key==='Home')go(0);else if(e.key==='End')go(slides.length-1);
+  else if(e.key==='f'||e.key==='F')fs();
+});
+let tx=null;addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>60&&e.target.type!=='range')go(cur+(dx<0?1:-1));tx=null});
+function fs(){if(!document.fullscreenElement)document.documentElement.requestFullscreen?.().catch(()=>{});else document.exitFullscreen?.()}
+$('#fsBtn').onclick=fs;
+let idleT;function wake(){$('#nav').classList.remove('idle');clearTimeout(idleT);idleT=setTimeout(()=>$('#nav').classList.add('idle'),3000)}
+addEventListener('mousemove',wake);addEventListener('keydown',wake);wake();
+
+function onEnter(id){
+  if(id==='s3')select('all');
+  if(id==='s5')setTemp('hot');
+  if(id==='s10')startQuiz();
+}
+
+/* ---------- layers ---------- */
+const INFO={
+  all:{n:'Մաշկը',t:'3 շերտ և դրանց տակ՝ խորքային հյուսվածքը',p:'Սեղմիր որևէ շերտի կամ մասի վրա՝ ավելին իմանալու համար։',c:'var(--c-epi)'},
+  epi:{n:'Էպիդերմիս',t:'1. Վերին շերտ',p:'Այն շերտն է, որը մենք տեսնում ենք։ Պաշտպանում է մարմինը և անընդհատ թարմանում է։',c:'var(--c-epi)'},
+  dermis:{n:'Դերմիս',t:'2. Միջին շերտ',p:'Այստեղ են քրտնագեղձերը, ճարպագեղձերը, մազերի արմատները, նյարդերն ու արյունատար անոթները։',c:'var(--c-dermis)'},
+  fat:{n:'Ենթամաշկային ճարպային շերտ',t:'3. Ստորին շերտ',p:'Կապված է դերմիսի հետ և գտնվում է մկանների ու ոսկորների վրա։ Պահում է ջերմությունը և մեղմում հարվածները։',c:'var(--c-fat)'},
+  deep:{n:'Խորքային հյուսվածք',t:'0. Մաշկի տակ',p:'Մկաններ և ոսկորներ։ Սա արդեն մաշկ չէ, բայց մաշկը հենց սրանց վրա է գտնվում։',c:'var(--c-deep)'},
+  hair:{n:'Մազ',t:'Աճում է դերմիսից',p:'Մազն աճում է մազապարկից, որը դերմիսի խորքում է։ Ներքևի հաստացած մասը մազի արմատն է։',c:'var(--c-root)'},
+  gland:{n:'Քրտնագեղձ',t:'Դերմիսում',p:'Արտադրում է քրտինք, որը նեղ խողովակով դուրս է գալիս մաշկի մակերես և սառեցնում մարմինը։',c:'var(--c-gland)'},
+  nerve:{n:'Նյարդեր',t:'Դերմիսում',p:'Նյարդային վերջավորությունների շնորհիվ մենք զգում ենք հպումը, տաքը, սառը և ցավը։',c:'var(--c-nerve)'},
+  artery:{n:'Զարկերակ',t:'Արյունատար անոթ',p:'Սրտից թթվածնով հարուստ արյուն է բերում մաշկին։',c:'var(--c-artery)'},
+  vein:{n:'Երակ',t:'Արյունատար անոթ',p:'Արյունը մաշկից հետ է տանում դեպի սիրտ։',c:'var(--c-vein)'}
+};
+const KEEP={epi:['epi'],dermis:['dermis','gland','nerve','artery','vein','hair'],fat:['fat'],deep:['deep'],hair:['hair'],gland:['gland'],nerve:['nerve'],artery:['artery'],vein:['vein']};
+const LS=$('#layerSkin');
+function select(k){
+  const parts=LS.querySelectorAll('.part');
+  if(k==='all'){LS.classList.remove('focus');parts.forEach(p=>p.classList.remove('on'))}
+  else{LS.classList.add('focus');parts.forEach(p=>p.classList.toggle('on',KEEP[k].includes(p.dataset.part)))}
+  $$('#s3 [data-sel]').forEach(b=>b.classList.toggle('sel',b.dataset.sel===k&&k!=='all'));
+  const i=INFO[k],box=$('#info');
+  box.style.setProperty('--ic',i.c);box.querySelector('small').textContent=i.t;box.querySelector('h3').textContent=i.n;box.querySelector('p').textContent=i.p;
+  box.classList.remove('flash');void box.offsetWidth;box.classList.add('flash');
+}
+$$('#s3 [data-sel]').forEach(b=>b.onclick=()=>select(b.dataset.sel));
+LS.addEventListener('click',e=>{const p=e.target.closest('[data-part]');if(p)select(p.dataset.part)});
+
+/* ---------- shield ---------- */
+const arena=$('#arena'),band=$('#band');
+const SH={hit:['🪨','⚽'],germ:['🦠','🦠','🦠','🦠','🦠'],env:['🌬️','❄️','☀️','💨'],water:['💧','💧','💧','💧','💧']};
+$$('[data-shield]').forEach(b=>b.onclick=()=>{
+  const k=b.dataset.shield,list=SH[k],up=k==='water';
+  list.forEach((em,i)=>setTimeout(()=>{
+    const s=document.createElement('span');s.className='fly '+(up?'up':'down');s.textContent=em;
+    s.style.setProperty('--x',(60+Math.random()*600)+'px');s.style.setProperty('--dx',((Math.random()-.5)*120)+'px');
+    if(k==='hit')s.style.fontSize='64px';
+    arena.appendChild(s);
+    setTimeout(()=>{band.classList.remove('flash');void band.offsetWidth;band.classList.add('flash')},860);
+    setTimeout(()=>s.remove(),1900);
+  },i*170));
+});
+
+/* ---------- temperature ---------- */
+const STEPS={
+  hot:[['🔴','Արյունատար անոթները լայնանում են, և ավելորդ ջերմությունը դուրս է գալիս'],['💦','Քրտնագեղձերը քրտինք են արտադրում'],['🌬️','Քրտինքը գոլորշիանում է և սառեցնում մարմինը']],
+  cold:[['🔵','Արյունատար անոթները նեղանում են'],['🔥','Մարմինն ավելի քիչ ջերմություն է կորցնում'],['🧍','Մազիկները բիզ-բիզ են կանգնում']]
+};
+function setTemp(k){
+  const sc=$('#tempScene');sc.classList.toggle('hot',k==='hot');sc.classList.toggle('cold',k==='cold');
+  $$('[data-temp]').forEach(b=>b.classList.toggle('sel',b.dataset.temp===k));
+  $('#outT').textContent=k==='hot'?'+35°':'−5°';
+  const col=k==='hot'?'#f5922b':'#2f6fd6';
+  $('#steps').innerHTML=STEPS[k].map((s,i)=>`<li style="--i:${i};--sc:${col}">${s[1]} <span>${s[0]}</span></li>`).join('');
+}
+$$('[data-temp]').forEach(b=>b.onclick=()=>setTemp(b.dataset.temp));
+
+/* ---------- feel ---------- */
+const SENSE={touch:['👆','#f6cf2f','Ինչ-որ բան դիպավ ինձ'],hot:['🔥','#ff6a2b','Տա՛ք է, զգույշ եղիր'],cold:['🧊','#3fa8f0','Վա՜յ, սառն է'],pain:['🌵','#e5404e','Ցավում է, հեռացրո՛ւ ձեռքդ']};
+const np=$('#nervePath'),glow=$('#nerveGlow'),pulse=$('#pulse'),brain=$('#brain'),bub=$('#bubble'),stim=$('#stim');
+const L=np.getTotalLength();let anim;
+$$('[data-sense]').forEach(b=>b.onclick=()=>{
+  const [em,col,msg]=SENSE[b.dataset.sense];cancelAnimationFrame(anim);
+  bub.classList.remove('show');brain.classList.remove('lit');brain.style.setProperty('--pc',col);
+  stim.textContent=em;stim.setAttribute('opacity',1);pulse.setAttribute('fill',col);pulse.setAttribute('opacity',1);glow.setAttribute('stroke',col);
+  const t0=performance.now(),dur=1100;
+  (function step(t){const k=Math.min(1,(t-t0)/dur),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;const pt=np.getPointAtLength(e*L);
+    pulse.setAttribute('cx',pt.x);pulse.setAttribute('cy',pt.y);glow.setAttribute('stroke-dasharray',`${e*L} 2000`);
+    if(k<1)anim=requestAnimationFrame(step);else{brain.classList.add('lit');bub.innerHTML=`${em} ${msg}`;bub.classList.add('show');pulse.setAttribute('opacity',0)}})(t0);
+});
+
+/* ---------- melanin ---------- */
+const zoom=$('#zoom');const dots=[];const zr=rng(3);
+for(let i=0;i<70;i++){const d=document.createElement('i');d.style.left=(8+zr()*88)+'%';d.style.top=(10+zr()*72)+'%';zoom.appendChild(d);dots.push(d)}
+const TONES=[[246,220,199],[226,180,142],[192,134,87],[138,86,49],[78,47,27]];
+function tone(v){const x=v/100*(TONES.length-1),i=Math.min(TONES.length-2,Math.floor(x)),f=x-i;return `rgb(${TONES[i].map((c,j)=>Math.round(c+(TONES[i+1][j]-c)*f)).join(',')})`}
+function mel(){const v=+$('#melR').value;$$('#face .tone').forEach(t=>t.setAttribute('fill',tone(v)));const n=Math.round(4+v/100*66);dots.forEach((d,i)=>d.classList.toggle('off',i>=n))}
+$('#melR').oninput=mel;mel();
+$('#frBtn').onclick=e=>{const on=$('#face').classList.toggle('fr');e.currentTarget.classList.toggle('sel',on);e.currentTarget.textContent=on?'Հեռացնել պեպենները':'Ավելացնել պեպեններ'};
+
+/* ---------- fact cards ---------- */
+const FACTS=[
+  [3,'🦠','Միլիոնավոր միկրոօրգանիզմներ','Դրանց մի մասը օգտակար է․ պաշտպանում է մեզ վնասակար մանրէներից։','#b6e39a'],
+  [4,'FP','Յուրահատուկ մատնահետքեր','Նույնիսկ միանման երկվորյակների մատնահետքերը նույնը չեն։','#e9d8c4'],
+  [5,'🩹','Ինքն իրեն վերականգնում է','Կտրվածքից կամ քերծվածքից հետո օրգանիզմը սկսում է վերականգնել վնասված հատվածը։','#ff9aa0'],
+  [6,'🔄','Անընդհատ թարմանում է','Հին բջիջներին փոխարինում են նորերը։ Մաշկի վերին շերտը թարմանում է մոտ մեկ ամսում։','#a8dcff'],
+  [7,'☀️','Վիտամին D','Արևի լույսի ազդեցությամբ մաշկն արտադրում է վիտամին D, որն օգնում է ոսկորներին ամուր լինել։','#ffe27a'],
+  [8,'🟤','Խալեր և պեպեններ','Առաջանում են այնտեղ, որտեղ գույն տվող նյութը՝ մելանինը, ավելի շատ է։','#e2b48e'],
+  [9,'⏳','Փոխվում է ողջ կյանքում','Տարիքի հետ մաշկը դառնում է ավելի բարակ, չոր և քիչ առաձգական։','#c9b3f0'],
+  [10,'🎈','Ձգվում է','Մաշկը ձգվում է և վերադառնում իր նախկին ձևին՝ հարմարվելով մեր շարժումներին։','#ffb766'],
+  [11,'🫧','Ճարպագեղձեր','Արտադրում են յուղ, որն օգնում է մաշկին ու մազերին ջրակայուն լինել։','#fff2a8'],
+  [12,'💦','Քրտնագեղձեր','Արտադրում են քրտինք, որը սառեցնում է մարմինը։ Մարդն ունի մի քանի միլիոն քրտնագեղձ։','#9fdc8f']
+];
+$('#cards').innerHTML=FACTS.map((f,i)=>`<button class="card r" style="--d:${2+i*.4};--cc:${f[4]}" aria-label="Փաստ ${f[0]}"><div class="in">
+  <div class="f"><div class="n">${f[0]}</div><div class="e">${f[1]==='FP'?fpIcon:f[1]}</div><h4>${f[2]}</h4></div>
+  <div class="b">${f[3]}</div></div></button>`).join('');
+$$('.card').forEach(c=>c.onclick=()=>c.classList.toggle('flip'));
+$('#flipAll').onclick=()=>{const all=$$('.card'),any=all.some(c=>!c.classList.contains('flip'));all.forEach((c,i)=>setTimeout(()=>c.classList.toggle('flip',any),i*70))};
+
+/* ---------- quiz ---------- */
+const Q=[
+  ['Ո՞րն է մաշկի վերին շերտը',['Դերմիս','Էպիդերմիս','Ճարպային շերտ'],1],
+  ['Ինչո՞ւ ենք մենք քրտնում',['Որ մարմինը սառչի','Որ մաշկը մգանա','Որ մազերն աճեն'],0],
+  ['Ինչի՞ց է կախված մաշկի գույնը',['Ջրի քանակից','Վիտամին D-ից','Մելանինի քանակից'],2],
+  ['Ո՞րն է մարդու մարմնի ամենամեծ օրգանը',['Սիրտը','Ուղեղը','Մաշկը'],2],
+  ['Միանման երկվորյակների մատնահետքերը նույնն ե՞ն',['Այո','Ոչ'],1]
+];
+let qi=0;
+function startQuiz(){qi=0;showQ()}
+function showQ(){
+  const [q,opts,ok]=Q[qi];$('#qn').textContent=`Հարց ${qi+1} / ${Q.length}`;$('#qq').textContent=q;$('#qm').textContent='';$('#qnext').hidden=true;
+  $('#qd').innerHTML=Q.map((_,i)=>`<i class="${i<qi?'done':i===qi?'cur':''}"></i>`).join('');
+  $('#qo').innerHTML=opts.map((o,i)=>`<button class="clay" data-i="${i}">${o}</button>`).join('');
+  $$('#qo .clay').forEach(b=>b.onclick=()=>{
+    if($('#qo').dataset.done==='1')return;
+    if(+b.dataset.i===ok){b.classList.add('ok');$('#qo').dataset.done='1';$('#qm').textContent='Ճի՛շտ է 🎉';confetti();
+      $('#qnext').hidden=false;$('#qnext').textContent=qi<Q.length-1?'Հաջորդ հարցը':'Սկսել նորից';}
+    else{b.classList.remove('no');void b.offsetWidth;b.classList.add('no');$('#qm').textContent='Փորձի՛ր նորից';}
+  });
+  $('#qo').dataset.done='0';
+}
+$('#qnext').onclick=()=>{if(qi<Q.length-1){qi++;showQ()}else startQuiz()};
+function confetti(){const box=$('#quiz'),cols=['var(--c-epi)','var(--c-dermis)','var(--c-fat)','var(--c-gland)','var(--c-vein)','var(--c-root)'];
+  for(let i=0;i<30;i++){const c=document.createElement('i');c.className='conf';c.style.background=cols[i%cols.length];const a=Math.random()*Math.PI*2,d=160+Math.random()*260;
+    c.style.setProperty('--tx',Math.cos(a)*d+'px');c.style.setProperty('--ty',Math.sin(a)*d*.6+'px');box.appendChild(c);setTimeout(()=>c.remove(),1100)}}
+
+/* ---------- palette ---------- */
+const PAL=[['--c-epi','Էպիդերմիս'],['--c-dermis','Դերմիս'],['--c-fat','Ճարպային շերտ'],['--c-deep','Խորքային հյուսվածք'],['--c-hair','Մազ'],['--c-root','Մազի արմատ'],['--c-gland','Քրտնագեղձ'],['--c-nerve','Նյարդեր'],['--c-artery','Զարկերակ'],['--c-vein','Երակ']];
+const root=document.documentElement,DEF={};PAL.forEach(([v])=>DEF[v]=getComputedStyle(root).getPropertyValue(v).trim());
+let saved={};try{saved=JSON.parse(localStorage.getItem('skinPal')||'{}')}catch(e){}
+Object.entries(saved).forEach(([k,v])=>root.style.setProperty(k,v));
+function buildPal(){$('#palList').innerHTML=PAL.map(([v,n])=>`<label>${n}<input type="color" data-v="${v}" value="${saved[v]||DEF[v]}"></label>`).join('');
+  $$('#palList input').forEach(i=>i.oninput=()=>{root.style.setProperty(i.dataset.v,i.value);saved[i.dataset.v]=i.value;try{localStorage.setItem('skinPal',JSON.stringify(saved))}catch(e){}})}
+buildPal();
+$('#palBtn').onclick=()=>$('#pal').classList.toggle('open');
+$('#palReset').onclick=()=>{saved={};PAL.forEach(([v])=>root.style.removeProperty(v));try{localStorage.removeItem('skinPal')}catch(e){}buildPal()};
+
+/* ---------- start ---------- */
+const h=parseInt(location.hash.slice(1));go(h>0?h-1:0);
+})();
+</script>
+</body>
+</html>
